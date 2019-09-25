@@ -1,15 +1,17 @@
 {
-  "name": "wf3-gpe",
+  "name": "Hello_Node_World",
   "version": "1.0.0",
-  "description": "Application de découverte de NodeJS",
+  "description": "Application de découverte NodeJS",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server-node.js"
   },
   "keywords": [],
-  "author": "Catherine RADIPALY",
-  "license": "ISC"0
+  "author": "Hugo LIEGEARD",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nunjucks": "^3.2.0"
+  }
 }
-
-
