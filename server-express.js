@@ -1,6 +1,6 @@
 /**
- * Mise en place de notre serveur
- * NodeJS grâce au Framework Express.
+ * Mise en Place de notre serveur NodeJS
+ * grâce au Framework Express.
  * @type {createApplication}
  */
 const express = require('express');
@@ -9,113 +9,135 @@ const express = require('express');
  * Création du serveur express.
  */
 const app = express();
-const port=3000;
+const port = 3000;
 
 /**
- *  Importer le package 'nunjucks'
+ * Importer le package 'nunjucks'
  * Configuration avec Express
- *https://mozilla.github.io/nunjuncks/getting-started.html
- * /
+ * https://mozilla.github.io/nunjucks/getting-started.html
+ */
+const nunjucks = require('nunjucks');
 
- const nunjucks = require( 'nunjucks');
+nunjucks.configure('views', {
+    autoescape: true,
+    express: app
+});
 
-
- /**
- *Importer le package 'lowdb'
+/**
+ * Importer le package 'lowdb'
  * https://www.npmjs.com/package/lowdb
- * *------------------------------------------
+ * ----------------------------------------
  * Il nous permettra de stocker et manipuler
  * des données dans un fichier au format JSON.
- * /
- * @type {{lib, precompile, Loader, runtime, installJinjaCompat, configure, lexer, Template, NodeResolveLoader, renderString, WebLoader, FileSystemLoader, nodes, parser, compile, PrecompiledLoader, Environment, reset, precompileString, compiler, render}|*}
  */
+const low = require('lowdb');
+const FileSync = require('lowdb/adapters/FileSync');
 
- const low = require('lowdb');
- const FileSync = require('lowdb/adapters/FileSync');
-
- const adapter = new FileSync('db.json');
- const db = low(adapter);
+const adapter = new FileSync('data/contacts.json');
+const db = low(adapter);
 
 /**
  * Pour récupérer les données POST, nous avons besoin
- * de la llibrairie 'body-parser". Elle nous permettra
- * de manipuler les données 'POST' de la requête.
+ * de la librairie 'body-parser'. Elle nous permettra
+ * de manipuler les données 'POST' de la requète.
  */
-const bodyParser= require('body-parser');
-app.use(bodyParser.urlencoded({extended: false}));
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 /**
- *Les objets 'req' (requete) et 'res' (réponse)
+ * Les objets 'req' (requete) et 'res' (réponse)
  * sont exactement les mêmes que ceux fournit par Node.
  */
 app.get('/', (req, res) => {
-    res.sendFile(__dirname+ '/views/html/index.html');
+    // res.sendFile(__dirname + '/views/html/index.html');
     res.redirect('/contacts');
 });
 
-app.get('/ajouter-un-contact', (req, res)=>{
-    res.redirect('/contact')
-})
+app.get('/contacts', (req, res) => {
 
-app.get('/ajouter-un-contact', (req, res)=>{
+    // -- Récupérer la liste des contacts depuis mon fichier JSON
+    const contactsDb = db.get('contacts').value();
+
+    // res.sendFile(__dirname + '/views/html/contacts.html');
+    res.render('html/contacts.html', {
+        contacts: contactsDb
+    });
+});
+
+app.get('/ajouter-un-contact', (req, res) => {
     res.render('html/ajouter-un-contact.html');
 });
 
-app.post('/ajouter-un-contact', (req, res)=> {
+app.post('/ajouter-un-contact', (req, res) => {
     /**
-     *lors de la soumission du formulaire avec
+     * Lors de la soumission du formulaire avec
      * la méthode POST, c'est cette fonction qui
-     * sera exécutée.
+     * sera executée.
      */
-    //console.log(reg.body);
+    // console.log( req.body );
     const contact = req.body;
 
-    // On ajoute le nouveau contact dans notre fichier JSON
+    //Création d'un ID pour le contact
+    contact.id = Date.now().toString();
+
+
+    // Pour ajouter le nouveau contact dans notre fichier JSON on procède ainsi
     db.get('contacts')
         .push(contact)
         .write();
 
-    // On redirige l'utilisateur sur les contacts
+    // On redirige l'utilisateur sur les contacts avec la formule suivante
     res.redirect('/contacts');
 });
 
-//--Récupérer la liste des contacts
-const contacts=db.get('contact').value();
+app.get('/contact/:id', (req, res) => {
 
-app.get('/contact', (req, res)=>{
-//res.sendFiler(_dirname + '/views/html/contact.html');
-res.render('html/contacts.html');
+    /**
+     * On souhaite récupérer dans notre fichier JSON
+     * le contact ayant l'ID passé dans l'URL !
+     * Pour ce faire on utilise la formule suivante
+     */
+    const contact = db
+        .get('contacts')
+        find({ id: req.params.id})
+            .value();
+
+    console.log(contact);
+
+    /**
+     * Je souhaite également, générer une vCard pour le contact
+     * Puis, a partir vCard générer un qrCode à afficher sur la page.
+     */
+    const
+    res.render('html/contact.html',{
+        contact: contact
+    });
 });
+
+
+
+//--La route permettant la suppression d'un contact
+app.get('/contact/:id/delete', (req, res) => {
+
+    /**
+     * On supprime le contact dans le fichier JSON
+     * en nous basant sur son ID.
+     */
+    db.get('contacts')
+        .remove({ id: req.params.id})
+        .write();
+
+    // Redirection sur la page principal
+    res.redirect('/contacts');
+
+});
+
 
 /**
- * *Démarrer l'écoute des connexions sur le port 3000
+ * Pour démarrer l'écoute des connexions sur le port 3000 on procède de la manière suivante
  */
-
-app.get('/contact', (req, res) => {
-
-    //-- Récupérer la liste des contacts
-    const contactsDb = db.get('contacts').value();
-
-    // res.sendFile(__dirname + '/views/html/contacts.html');
-    res.sendFile(__dirname+ '/views/html/contact.html');
-
+app.listen(port, () => {
+    console.log(`App listening on port http://localhost:${port}!`)
 });
-
-
-
-
-/**
- * La formule qui suit permet de démarrer l'écoute des connexions sur le port 3000
- */
-app.listen(3000, () => {
-    console.log('App listening on port http://localhost: ${port}!')
-});
-
-
-
-
-
-
-
 

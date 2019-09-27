@@ -1,24 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Contact</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-</head>
-<body>
-<div class="coontainer">
-    <div class="col">
-        <div class="jumbotron mt-4">
-    <h1 class="display-4">Catherine RADIPALY</h1>
-            <hr class="my-4">
-            <p class="lead"><strong>Email :</strong> wf3@hl-media.fr</p>
-            <p class="lead"><strong>Téléphone:</strong>/p>
-</div>
-<div class="py-5 bg-light">
+{% extends "layout/base.html" %}
+
+{% block title %} Fiche {{ contact.prenom }} {{ contact.com }} {% endblock %}
+
+{% block content %}
     <div class="container">
-        <div class="row">
-            <div class="col">
-                <div class="card shadow-sm">
-</body>
-</html>
+        <div class="col">
+            <div class="jumbotron mt-4">
+                <h1 class="display-4">{{ contact.prenom }} {{ contact.com }}</h1>
+                <hr class="my-4">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-8">
+                <p class="lead"><strong>Email : </strong> {{ contact.email }}</p>
+                <p class="lead"><strong>Téléphone : </strong> {{ contact.tel }}</p>
+                            </div>
+                        <div class="col-4">
+                            <img class="text-center float-right" src="{{ qrCodeUrl }}" alt="vCard">
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-4">
+                <a class="btn btn-sm btn-primary" href="/contact/{{ contact.id}}/delete">
+                    <i class="fas fa-trash"></i>Supprimer ce contact
+                </a>
+                <a class="btn btn-sm btn-primary" href="/contacts">
+                    <i class="fas fa-list"></i>Retourner aux contacts
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
